@@ -52,7 +52,8 @@ const monsterCard = (props) => {
         return <React.Fragment key={g.key + index.toString()}> <p><span>{g.name}</span> <span>{g.desc}</span></p></React.Fragment>
     })
     return (
-        <div className={classes.MonsterCard}>
+        <div className={classes.MonsterCard}
+        onClick={props.clicked}>
             <div className={classes.Section}>
                 <div className={classes.Logo}>
                     <img src={imageCall} />

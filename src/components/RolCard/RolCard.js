@@ -53,7 +53,8 @@ const rolCard = (props) => {
         return <React.Fragment key={g.key + index.toString()}> <p><span>{g.name}</span> <span>{g.desc}</span></p></React.Fragment>
     })
     return (
-        <div className={classes.RolCard}>
+        <div className={classes.RolCard}
+        onClick={props.clicked}>
             <div className={classes.Section}>
                 <div className={classes.Logo}>
                     <img src={imageCall} />
