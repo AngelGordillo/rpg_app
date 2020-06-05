@@ -54,7 +54,10 @@ const rolCard = (props) => {
     })
     return (
         <div className={classes.RolCard}
-        onClick={props.clicked}>
+            onClick={() => {
+                console.log('Clicked the role ', props.playerData)
+                props.onTargetPlayer(props.playerData.id)
+            }}>
             <div className={classes.Section}>
                 <div className={classes.Logo}>
                     <img src={imageCall} />

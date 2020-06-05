@@ -97,8 +97,8 @@ class Battlefield extends Component {
   getPlayer = (id) =>
     this.state.participants.find((element) => element.id === id);
 
-  getTarget = (id,e) => {
-    console.log("Targetted!", e.target.value);
+  getTarget = (id) => {
+    console.log("Targetted!", id);
     if (this.state.targetting) {
       this.attack(this.state.currentPlayer, id);
       this.setState({ ...this.state, targetting: !this.state.targetting });
@@ -314,21 +314,23 @@ class Battlefield extends Component {
         if (p.isMonster) {
           return (
             <MonsterCard
-              clicked={(e) => this.getTarget(e, p.id)}
+              onTargetPlayer={this.getTarget}
               key={p.stats.id}
               dataInfo={p.stats.info}
               dataStats={p.stats.stats}
               dataLife={p.stats.lifeAndMagic}
+              playerData={p}
             />
           );
         } else {
           return (
             <RolCard
-              clicked={(e) => this.getTarget(e, p.id)}
+              onTargetPlayer={this.getTarget}
               key={p.stats.id}
               dataInfo={p.stats.info}
               dataStats={p.stats.stats}
               dataLife={p.stats.lifeAndMagic}
+              playerData={p}
             />
           );
         }
