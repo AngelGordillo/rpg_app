@@ -2,17 +2,17 @@ import React from 'react';
 
 import imageCall from '../../assets/call.png';
 import classes from './MonsterCard.module.css'
-import { schema } from '../../shared/MonsterSchemaForm';
+import { monsterSchema } from '../../shared/MonsterSchemaForm';
 const monsterCard = (props) => {
     let urlPicture = '';
     const monsterDataInfo = [];
 
     for (let data in props.dataInfo) {
-        if (schema.properties[data].title === 'Link') {
+        if (monsterSchema.properties[data].title === 'Link') {
             urlPicture = props.dataInfo[data];
         } else {
             monsterDataInfo.push({
-                name: schema.properties[data].title,
+                name: monsterSchema.properties[data].title,
                 desc: props.dataInfo[data]
             })
         }
@@ -52,9 +52,8 @@ const monsterCard = (props) => {
         return <React.Fragment key={g.key + index.toString()}> <p><span>{g.name}</span> <span>{g.desc}</span></p></React.Fragment>
     })
     return (
-        <div className={classes.MonsterCard}
+        <div className={[classes.MonsterCard,classes[props.clickable]].join(' ')}
         onClick={() => {
-            console.log('Clicked the role ', props.playerData)
             props.onTargetPlayer(props.playerData.id)
         }}>
             <div className={classes.Section}>

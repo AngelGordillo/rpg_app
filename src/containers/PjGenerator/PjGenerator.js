@@ -8,15 +8,19 @@ import { Redirect } from "react-router-dom";
 import Auxiliary from '../../hoc/Auxiliary/Auxiliary';
 import * as actions from '../../store/actions/index';
 import axios from '../../axios';
-import { schema, uiOrder } from '../../shared/PjSchemaForm';
+import { pjSchema, uiOrder } from '../../shared/PjSchemaForm';
 import withErrorHandler from '../../hoc/withErrorHandler/withErrorHandler';
 import Spinner from '../../components/UI/Spinner/Spinner';
 const Form = withTheme(MuiTheme);
 class PjGenerator extends Component {
 
     render() {
-        const successRedirect = this.props.success ? <Redirect to='/' /> : null
-        let form = (<Form schema={schema} onSubmit={this.props.onAddPj} uiSchema={uiOrder} >
+        let successRedirect;
+        if (this.props.success) {
+            successRedirect = <Redirect to='/' />;
+            this.props.onInitPj()
+        }
+        let form = (<Form schema={pjSchema} onSubmit={this.props.onAddPj} uiSchema={uiOrder} >
             <Button type="submit" className="button button--primary button--large">
                 Submit
           </Button>
@@ -43,7 +47,8 @@ const mapStateToProps = (state) => {
 }
 const mapDispatchToProps = (dispatch) => {
     return {
-        onAddPj: (pjData) => dispatch(actions.pjGenerator(pjData))
+        onAddPj: (pjData) => dispatch(actions.pjGenerator(pjData)),
+        onInitPj: () => dispatch(actions.pjInit())
     }
 }
 export default connect(mapStateToProps, mapDispatchToProps)(withErrorHandler(PjGenerator, axios));

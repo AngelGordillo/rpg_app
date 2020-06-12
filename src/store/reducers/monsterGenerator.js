@@ -7,6 +7,8 @@ const intialState = {
 }
 export const reducer = (state = intialState, action) => {
     switch (action.type) {
+        case actionTypes.MONSTER_INIT:
+            return { ...state, success:false };
         case actionTypes.MONSTER_CREATION_START:
             return { ...state, loading: true, success:false };
         case actionTypes.MONSTER_CREATION_FAIL:

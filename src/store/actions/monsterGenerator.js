@@ -14,6 +14,11 @@ export const monsterGeneratorFail = (error) => {
     }
 }
 
+export const monsterInit = () => {
+    return {
+        type: actionTypes.MONSTER_INIT,
+    }
+}
 export const monsterGeneratorSuccess = (id, monsterData) => {
     return {
         type: actionTypes.MONSTER_CREATION_SUCCESS,

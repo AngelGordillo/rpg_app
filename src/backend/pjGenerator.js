@@ -9,7 +9,7 @@ export const generatePj = (pjData) => {
         Magia: randomIntFromInterval(5, 55),
     }
     const generatedPj = {
-        info: { ...pjData.formData },
+        info: { ...pjData.formData, tipo:'normal' },
         stats: { ...stats },
         lifeAndMagic: { ...lifeAndMagic }
 

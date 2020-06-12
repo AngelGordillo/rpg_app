@@ -7,6 +7,8 @@ const intialState = {
 }
 export const reducer = (state = intialState, action) => {
     switch (action.type) {
+        case actionTypes.PJ_INIT:
+            return { ...state, success:false };
         case actionTypes.PJ_CREATION_START:
             return { ...state, loading: true, success: false };
         case actionTypes.PJ_CREATION_FAIL:

@@ -8,6 +8,7 @@ import MenuItem from "@material-ui/core/MenuItem";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
 import Spinner from "../../components/UI/Spinner/Spinner";
 import RolCard from "../../components/RolCard/RolCard";
+import Card from "../../components/Card/Card";
 import MonsterCard from "../../components/MonsterCard/MonsterCard";
 import { Button } from "@material-ui/core";
 import { updateObject } from "../../shared/utility";
@@ -32,7 +33,13 @@ class Battlefield extends Component {
     isBattleActive: false,
     targetting: false,
     turnOrder: [],
+    clickable: false,
+    battleResult: {
+      winner: null,
+      looser: null
+    },
     currentPlayer: "",
+    currentAction: null,
     teams: [
       {
         name: "team1",
@@ -45,49 +52,66 @@ class Battlefield extends Component {
     ],
   };
 
-  clickListener = (e) => {
-    console.log("Boom I clicked ", e.target);
-  };
+
 
   componentDidMount() {
     this.props.onFetchMonster();
     this.props.onFetchPj();
-    // document.addEventListener("click", this.clickListener);
   }
 
+  checkCurrentVit = () => {
+    this.state.teams.map(team => {
+      //console.log('this.state.participants',this.state.participants)
+      this.state.participants
+        .map((p) => {
+          if (p.vit <= 0) {
+            //deleting from the orderTurn array
+            const indexOrder = this.state.turnOrder.indexOf(p.id);
+            const newTurnOrder = [...this.state.turnOrder];
+            if (indexOrder > -1) {
+              newTurnOrder.splice(indexOrder, 1)
+            }
+            //deleting element from the team 
+            const newTeams = [...this.state.teams];
+            const indexTeams = team.pjIds.indexOf(p.id);
+
+            if (indexTeams > -1) {
+              newTeams.map(m => {
+                m.pjIds.splice(indexTeams, 1)
+              })
+            }
+            this.setState({
+              ...this.state,
+              turnOrder: newTurnOrder,
+              teams: newTeams
+            });
+          }
+        })
+    })
+  }
   checkWinner = () => {
-    if (this.state.vitMonster <= 0) {
-      this.setState(
-        {
-          ...this.state,
-          active: false,
-          winner: "PJ",
-          looser: "MONSTER",
-        },
-        () => {
-          console.log("PJ WINS");
-          console.log(this.state);
-        }
-      );
-    }
-    if (this.state.vitPj <= 0) {
-      this.setState(
-        {
-          ...this.state,
-          active: false,
-          winner: "MONSTER",
-          looser: "PJ",
-        },
-        () => {
-          console.log("MONSTER WINS");
-          console.log(this.state);
-        }
-      );
-    }
+    this.state.teams.map(team => {
+      //console.log('this.state.participants',this.state.participants)
+      if (!team.pjIds.length) {
+        this.setState(
+          {
+            ...this.state,
+            isBattleActive: false,
+            battleResult: {
+              ...this.state.battleResult,
+              winner: "PJ",
+              looser: "targetPlayer",
+            }
+          },
+          () => {
+            this.addToLog(`[SOMEONE WON]`);
+          }
+        );
+      }
+    })
   };
 
   addToLog = (msg) => {
-    console.log("Adding to the batter log", msg);
     this.setState((prevState) => ({
       ...prevState,
       battleLog: [...prevState.battleLog, msg],
@@ -97,18 +121,35 @@ class Battlefield extends Component {
   getPlayer = (id) =>
     this.state.participants.find((element) => element.id === id);
 
+  /*   applyAction = (senderId, targetId) => {
+      const action = this.state.currentAction;
+      logging(sendserId, targetId);
+      action.doAction(targetId);
+    } */
+
   getTarget = (id) => {
-    console.log("Targetted!", id);
     if (this.state.targetting) {
-      this.attack(this.state.currentPlayer, id);
-      this.setState({ ...this.state, targetting: !this.state.targetting });
+      this.attack(this.state.currentPlayer, id)
+      //this.applyAction(state.currentPlayer, id);
+      this.setState({ ...this.state, targetting: false, clickable: false });
       this.addToLog(`[Disabled targetting]`);
     }
   };
 
+
+
+  /*   getTargetAll = (teamName) => {
+      const team = getTeam(teamName);
+      foreach(string id: team.pjIds){
+        applyAction(id, action);
+      }
+        this.setState({ ...this.state, targetting: !this.state.targetting });
+        this.addToLog(`[Disabled targetting]`);
+    }; */
+
   targetting = async () => {
     this.addToLog(`[Enter targetting mode]`);
-    this.setState({ ...this.state, targetting: !this.state.targetting });
+    this.setState({ ...this.state, targetting: !this.state.targetting, clickable: !this.state.clickable, targettingAll: !this.state.targettingAll });
 
     // this.setState({ ...this.state, targetting: !this.state.targetting },(event)=>{
     //   this.getTarget(event);
@@ -118,55 +159,78 @@ class Battlefield extends Component {
     // using that event find out which participant is the target....
     // then call the attack with currentplayer, targetplayer
   };
+  targettingAll = async () => {
+    this.addToLog(`[Enter targetting mode]`);
+    this.setState({ ...this.state, targettingAll: !this.state.targettingAll });
+
+    // this.setState({ ...this.state, targetting: !this.state.targetting },(event)=>{
+    //   this.getTarget(event);
+    // });
+    // change text on screen to indicate choose your target....
+    // click target -> event calls getTarget....
+    // using that event find out which participant is the target....
+    // then call the attack with currentplayer, targetplayer
+  };
+  getNextParticipant = () => {
+    const currentIndex = this.state.turnOrder.indexOf(this.state.currentPlayer);
+    const nextIndex = (currentIndex + 1) % this.state.turnOrder.length;
+    const nextPlayer = this.state.turnOrder[nextIndex];
+    return nextPlayer;
+  };
 
   attack = async (currentPlayer, targetPlayer) => {
-    console.log("ataque de " + this.state.currentPlayer);
     let totalDamage = 0;
     if (this.state.currentPlayer) {
       //get currentPlayer
       await this.targetting();
       const currentPlayerInfo = this.getPlayer(currentPlayer);
       //get tarjetPlayer
-
       const targetPlayerInfo = this.getPlayer(targetPlayer);
-
       const { name: targetPlayerName } = targetPlayerInfo.stats.info;
       const { name: currentPlayerName } = currentPlayerInfo.stats.info;
-
       this.addToLog(
         `[Attack start] ${currentPlayerInfo.stats.info.name} is attacking ${targetPlayerInfo.stats.info.name}`
       );
-      console.log(currentPlayerInfo);
-      console.log(targetPlayerInfo);
-      //damage calculation
+      // damage calculation
       totalDamage =
         currentPlayerInfo.stats.stats.Fuerza -
         targetPlayerInfo.stats.stats.Resistencia -
         1;
       this.addToLog(
-        `[Damage Calc] ${currentPlayerName}: ${currentPlayerInfo.stats.stats.Fuerza}. ${targetPlayerName}: ${targetPlayerInfo.stats.stats.Resistencia}.`
+        ` [Damage Calc] ${currentPlayerName}:Str= ${currentPlayerInfo.stats.stats.Fuerza} to ${targetPlayerName}: ${targetPlayerInfo.stats.stats.Resistencia}.`
       );
-
       totalDamage <= 0 ? (totalDamage = 0) : (totalDamage = totalDamage);
       this.addToLog(`[Total Damage] ${totalDamage} to ${targetPlayerName}`);
-
       //   take damage from targer player
       targetPlayerInfo.vit = targetPlayerInfo.vit - totalDamage;
       const tt = this.state.participants.findIndex(
         (p) => p.id === targetPlayer
       );
-
       let newArrayParticipants = [...this.state.participants];
       newArrayParticipants[tt] = targetPlayerInfo;
-      console.log(newArrayParticipants);
       this.addToLog(
         `[Final Health Left] ${targetPlayerName}: ${targetPlayerInfo.vit} `
       );
 
+      /*
+       * checking current vit of each player 
+       * removing the ones which do not have any vit left
+       */
+      this.checkCurrentVit();
+
+      const nextPlayer = this.getNextParticipant();
       this.setState((prevState) => ({
         ...prevState.state,
         participants: newArrayParticipants,
-      }));
+        currentPlayer: nextPlayer
+
+      }), () => {
+        this.checkWinner(targetPlayerInfo);
+        this.addToLog(
+          `[NextTurn] ${nextPlayer}`
+        );
+      });
+
     }
   };
 
@@ -206,17 +270,14 @@ class Battlefield extends Component {
     }
   };
 
-  turn = (participantMakingAction, action, targetParticipant, { event }) => {
-    console.log(
-      "Triggered action: ",
-      participantMakingAction,
-      action,
-      targetParticipant,
-      event
-    );
+  invokeAction = (action) => {
     switch (action) {
       case "attack":
-        return this.attack(participantMakingAction, targetParticipant);
+        return this.targetting;
+      case "special":
+        return this.targettingAll;
+      case "magic":
+        return this.this.targetting;
       case "def":
         return this.def;
     }
@@ -239,7 +300,7 @@ class Battlefield extends Component {
       {
         ...this.setState,
         turnOrder: turnOrder,
-        active: true,
+        isBattleActive: true,
         currentPlayer: turnOrder[0],
       },
       () => {
@@ -248,7 +309,6 @@ class Battlefield extends Component {
           const player = this.state.participants.find(
             (element) => element.id === playerId
           );
-          console.log(`Player is ${index}`, player.stats.info.name);
         });
       }
     );
@@ -313,7 +373,9 @@ class Battlefield extends Component {
       participants = this.state.participants.map((p) => {
         if (p.isMonster) {
           return (
-            <MonsterCard
+            <Card
+              clickable={!(this.state.clickable && p.vit > 0) ? '' : 'Clickable'}
+              type={p.stats.info.tipo}
               onTargetPlayer={this.getTarget}
               key={p.stats.id}
               dataInfo={p.stats.info}
@@ -324,7 +386,9 @@ class Battlefield extends Component {
           );
         } else {
           return (
-            <RolCard
+            <Card
+              clickable={!(this.state.clickable && p.vit > 0) ? '' : 'Clickable'}
+              type={p.stats.info.tipo}
               onTargetPlayer={this.getTarget}
               key={p.stats.id}
               dataInfo={p.stats.info}
@@ -339,7 +403,7 @@ class Battlefield extends Component {
 
     const currentPlayerName = currentPlayer
       ? this.state.participants.find((p) => p.id === currentPlayer).stats.info
-          .name
+        .name
       : "";
 
     //TODO: CHECK USSING MATERIAL-UI COMPONENTS INSTEAD OF NORMAL ONES
@@ -383,27 +447,34 @@ class Battlefield extends Component {
     return (
       <div>
         <div>{data}</div>
-        <div style={{ float: "left", width: "42%" }}>{participants}</div>
-
+        <div style={{ float: "left", width: "42%" }}>{participants} </div>
+{/*         {this.state.targettingAll ? <div onClick={this.getTargetAll}><h1>All</h1></div> : null} */}
         <div style={{ width: "45%", float: "left", padding: "50px" }}>
           <Button onClick={this.Battle}>Start Battle</Button>
-          {this.state.active ? (
+          {this.state.isBattleActive ? (
             <div>
               {" "}
               <Button
-                onClick={this.targetting}
-                //   this.turn(currentPlayer, "attack", currentPlayer, event)
+                //onClick={this.targetting}
+                onClick={this.invokeAction("attack")}
               >
                 Attack
-              </Button>{" "}
+              </Button>
+              <Button
+                //onClick={this.targetting}
+                onClick={this.invokeAction("special")}
+              >
+                Special
+              </Button>
+              {" "}
               <Button onClick={() => this.turn("def")}>Defense</Button>{" "}
             </div>
           ) : null}
-          {this.state.active && currentPlayer && (
+          {this.state.isBattleActive && currentPlayer && (
             <div>Playing as: {currentPlayerName}</div>
           )}
 
-          {this.state.active && (
+          {this.state.isBattleActive && (
             <pre style={{ padding: "0.5rem", background: "#F5F5F5" }}>
               {this.state.battleLog.join("\n\n")}
             </pre>

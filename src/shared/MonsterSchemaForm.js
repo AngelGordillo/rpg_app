@@ -1,4 +1,4 @@
-export const schema = {
+export const monsterSchema = {
     title: "A monster form",
     description: "A form whichs allows you to register a moster",
     type: "object",
@@ -20,7 +20,7 @@ export const schema = {
         },
         uri: {
             type: "string",
-            title: 'Link',
+            title: "Link",
         }
     }
 };

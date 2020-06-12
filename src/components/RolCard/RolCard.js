@@ -3,21 +3,16 @@ import React from 'react';
 import image from '../../assets/investigador.jpg';
 import imageCall from '../../assets/call.png';
 import classes from './RolCard.module.css'
-import { schema } from '../../shared/PjSchemaForm';
+import { pjSchema } from '../../shared/PjSchemaForm';
 const rolCard = (props) => {
     let urlPicture = '';
     const pjDataInfo = [];
 
     for (let data in props.dataInfo) {
-        if (schema.properties[data].title === 'Link') {
-            urlPicture = props.dataInfo[data];
-        } else {
-            pjDataInfo.push({
-                name: schema.properties[data].title,
-                desc: props.dataInfo[data]
-            })
-        }
-
+                pjDataInfo.push({
+                    name: data,
+                    desc: props.dataInfo[data]
+                })
     }
 
     const pjDataStats = [];
@@ -53,11 +48,7 @@ const rolCard = (props) => {
         return <React.Fragment key={g.key + index.toString()}> <p><span>{g.name}</span> <span>{g.desc}</span></p></React.Fragment>
     })
     return (
-        <div className={classes.RolCard}
-            onClick={() => {
-                console.log('Clicked the role ', props.playerData)
-                props.onTargetPlayer(props.playerData.id)
-            }}>
+        <div className={[classes.RolCard,classes[props.clickable]].join(' ')}>
             <div className={classes.Section}>
                 <div className={classes.Logo}>
                     <img src={imageCall} />

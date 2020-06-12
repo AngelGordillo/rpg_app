@@ -8,13 +8,12 @@ import { Redirect } from "react-router-dom";
 import Auxiliary from '../../hoc/Auxiliary/Auxiliary';
 import * as actions from '../../store/actions/index';
 import axios from '../../axios';
-import { schema, uiOrder } from '../../shared/MonsterSchemaForm';
+import { monsterSchema, uiOrder } from '../../shared/MonsterSchemaForm';
 import withErrorHandler from '../../hoc/withErrorHandler/withErrorHandler';
 import Spinner from '../../components/UI/Spinner/Spinner';
 import Modal from '../../components/UI/Modal/Modal';
 const Form = withTheme(MuiTheme);
 class MonsterGenerator extends Component {
-
 
     /*     closeModal = () => {
             this.setState({
@@ -24,9 +23,14 @@ class MonsterGenerator extends Component {
         } */
 
     render() {
-        const successRedirect = this.props.success ? <Redirect to='/' /> : null
+        let successRedirect;
+        if (this.props.success) {
+            successRedirect = <Redirect to='/' />;
+            this.props.onInitMonster()
+        }
+
         let form = (
-            <Form schema={schema} onSubmit={this.props.onAddMonster} uiSchema={uiOrder} >
+            <Form schema={monsterSchema} onSubmit={this.props.onAddMonster} uiSchema={uiOrder} >
                 <Button type="submit" className="button button--primary button--large">
                     Submit
           </Button>
@@ -54,7 +58,8 @@ const mapStateToProps = (state) => {
 }
 const mapDispatchToProps = (dispatch) => {
     return {
-        onAddMonster: (monsterData) => dispatch(actions.monsterGenerator(monsterData))
+        onAddMonster: (monsterData) => dispatch(actions.monsterGenerator(monsterData)),
+        onInitMonster: () => dispatch(actions.monsterInit())
     }
 }
 export default connect(mapStateToProps, mapDispatchToProps)(withErrorHandler(MonsterGenerator, axios));

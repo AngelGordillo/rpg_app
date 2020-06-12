@@ -1,6 +1,12 @@
 import * as actionTypes from './actionTypes';
 import axios from '../../axios';
 import * as pjGeneratorBack from '../../backend/pjGenerator';
+
+export const pjInit = () => {
+    return {
+        type: actionTypes.PJ_INIT,
+    }
+}
 export const pjGeneratorStart = () => {
     return {
         type: actionTypes.PJ_CREATION_START

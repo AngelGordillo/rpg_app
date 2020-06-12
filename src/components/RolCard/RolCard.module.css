@@ -88,6 +88,9 @@ p>span:first-of-type {
     border-right: 2px solid black;
 }
 
+.Clickable{
+    background-color: lightcoral;
+}
 @media(min-width: 500px) and (min-height: 400px) {
     .RolCard {
         width: 350px;
